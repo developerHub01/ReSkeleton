@@ -1,4 +1,4 @@
-import styled, { StyleSheetManager, css } from "styled-components";
+import styled, { css } from "styled-components";
 
 type stringOrNum = string | number;
 
@@ -11,6 +11,8 @@ interface SkeletonProps {
   animType?: string | boolean;
   roundness?: string | number;
   className?: string | object;
+  anim1?: string;
+  anim2?: string[];
   style?: object;
 }
 
@@ -65,6 +67,25 @@ const pulseAnim = css`
   }
 `;
 
+/* 
+
+  ${(props) =>
+    props.$animType ? `animation: ${pulseAnim} 1.6s linear infinite;` : ""}
+
+
+    ${(props) =>
+    typeof props.$animType === "string" &&
+    props.$animType?.toLowerCase() === "slide"
+      ? `&::before {
+      animation: ${slideAnim} 1.5s linear infinite;
+    }
+    &::after {
+      animation-delay: 0.5s;
+      animation: ${slideAnim} 1s linear infinite;
+    }`
+      : ""}
+*/
+
 const SkeletonComp = styled.div<SkeletonProps>`
   background: ${(props) => props.color};
   ${(props) =>
@@ -77,8 +98,7 @@ const SkeletonComp = styled.div<SkeletonProps>`
   border-radius: ${(props) => props.roundness};
   overflow: hidden;
   position: relative;
-  ${(props) =>
-    props.animType ? `animation: ${pulseAnim} 1.6s linear infinite;` : ""}
+  ${(props) => props.anim1}
   transform-origin: left center;
   &::before,
   &::after {
@@ -92,17 +112,13 @@ const SkeletonComp = styled.div<SkeletonProps>`
     left: 0;
     filter: blur(50px);
   }
-  ${(props) =>
-    typeof props.animType === "string" &&
-    props.animType?.toLowerCase() === "slide"
-      ? `&::before {
-      animation: ${slideAnim} 1.5s linear infinite;
-    }
-    &::after {
-      animation-delay: 0.5s;
-      animation: ${slideAnim} 1s linear infinite;
-    }`
-      : ""}
+  &::before {
+    ${(props) => props.anim2[0]}
+  }
+  &::after {
+    animation-delay: 0.5s;
+    ${(props) => props.anim2[1]}
+  }
 `;
 const Skeleton: React.FC<SkeletonProps> = (props) => {
   const newModifiedProps = { ...props };
@@ -130,11 +146,20 @@ const Skeleton: React.FC<SkeletonProps> = (props) => {
     "px"
   );
 
-  return (
-    // <StyleSheetManager shouldForwardProp={(props) => props !== "animType"}>
-    <SkeletonComp {...newModifiedProps} />
-    // </StyleSheetManager>
-  );
+  const anim1 = newModifiedProps["animType"]
+    ? `animation: ${pulseAnim} 1.6s linear infinite;`
+    : "";
+  const anim2 =
+    newModifiedProps["animType"] === "string" &&
+    newModifiedProps["animType"]?.toLowerCase() === "slide"
+      ? [
+          `animation: ${slideAnim} 1.5s linear infinite;`,
+          `animation: ${slideAnim} 1s linear infinite;`,
+        ]
+      : ["", ""];
+  newModifiedProps["anim1"] = anim1;
+  newModifiedProps["anim2"] = anim2;
+  return <SkeletonComp {...newModifiedProps} />;
 };
 
 export default Skeleton;
