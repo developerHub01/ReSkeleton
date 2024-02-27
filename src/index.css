@@ -1,0 +1,54 @@
+.anim,
+.anim-slide {
+  position: relative;
+  animation: baseSkeletonAnim 1.6s linear infinite;
+  transform-origin: left center;
+}
+.anim.anim-slide::before,
+.anim.anim-slide::after {
+  content: "";
+  position: absolute;
+  width: 20%;
+  height: 5000%;
+  top: 50%;
+  transform: translate(-100%, -50%) rotate(15deg);
+  background: rgba(255, 255, 255, 0.25);
+  left: 0;
+  filter: blur(50px);
+}
+.anim::before {
+  animation: anim1 1.5s linear infinite;
+}
+.anim::after {
+  animation-delay: 0.5s;
+  animation: anim1 1s linear infinite;
+}
+@keyframes anim1 {
+  0% {
+    left: 0;
+    opacity: 1;
+  }
+  20%,
+  80% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    left: 200%;
+  }
+}
+
+@keyframes baseSkeletonAnim {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scaleX(0.99);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scaleX(1);
+  }
+}
