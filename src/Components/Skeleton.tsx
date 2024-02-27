@@ -4,14 +4,18 @@ import SkeletonCircle from "./SkeletonCircle";
 import SkeletonRect from "./SkeletonRect";
 import SkeletonRound from "./SkeletonRound";
 
-const Skeleton = (props) => {
+interface SkeletonProps {
+  type: "text" | "circle" | "react" | "round";
+}
+
+const Skeleton: React.FC<SkeletonProps> = (props) => {
   const { type } = props;
-  switch (type) {
-    case type.toLowerCase() === "circle":
+  switch (type.toLowerCase()) {
+    case "circle":
       return <SkeletonCircle />;
-    case type.toLowerCase() === "react":
+    case "react":
       return <SkeletonRect />;
-    case type.toLowerCase() === "round":
+    case "round":
       return <SkeletonRound />;
     default:
       return <SkeletonText />;
