@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled, { keyframes, StyleSheetManager } from "styled-components";
 
 type stringOrNum = string | number;
 
@@ -8,14 +8,10 @@ interface SkeletonProps {
   width?: stringOrNum;
   height?: stringOrNum;
   color?: string;
-  animType?: string | boolean;
-  roundness?: string | number;
+  opacity?: stringOrNum;
+  anim?: string | false;
+  roundness?: stringOrNum;
   className?: string | object;
-<<<<<<< HEAD
-=======
-  anim1?: string;
-  anim2?: string[];
->>>>>>> 06b8af88c93509b53a0b84a34fd2670a875240da
   style?: object;
 }
 
@@ -41,7 +37,7 @@ const checkRoundness = (type: string) => {
       return "4px";
   }
 };
-const slideAnim = css`
+const slideAnim = keyframes`
   0% {
     left: 0;
     opacity: 1;
@@ -58,7 +54,7 @@ const slideAnim = css`
     left: 200%;
   }
 `;
-const pulseAnim = css`
+const pulseAnim = keyframes`
   0%,
   100% {
     opacity: 0.3;
@@ -70,21 +66,22 @@ const pulseAnim = css`
   }
 `;
 
-
-const SkeletonComp = styled.div<SkeletonProps>`
-  background: ${(props) => props.color};
-  ${(props) =>
+const SkeletonCustomStyle = (props: SkeletonProps) => {
+  return `
+  background:  ${props.color};
+  ${
     props.type?.toLowerCase() === "circle"
       ? `width: ${props.size};
     height: ${props.size};`
       : `width: ${props.width};
-    height: ${props.height};`}
+    height: ${props.height};`
+  }
   margin: 5px 0;
-  border-radius: ${(props) => props.roundness};
+  border-radius: ${props.roundness};
   overflow: hidden;
+  opacity: ${props.opacity};
   position: relative;
-  ${(props) =>
-    props.animType && `animation: ${pulseAnim} 1.6s linear infinite;`}
+
   transform-origin: left center;
   &::before,
   &::after {
@@ -94,29 +91,51 @@ const SkeletonComp = styled.div<SkeletonProps>`
     height: 5000%;
     top: 50%;
     transform: translate(-100%, -50%) rotate(15deg);
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.5);
     left: 0;
-    filter: blur(50px);
+    filter: blur(20px);
   }
-  ${(props) =>
-    typeof props.animType === "string" &&
-    props.animType?.toLowerCase() === "slide"
-      ? `
-          &::before {
-            animation: ${slideAnim} 1.5s linear infinite;
-          }
-          &::after {
-            animation-delay: 0.5s;
-            animation: ${slideAnim} 1s linear infinite;
-          }
-        `
-      : ""}
+  `;
+};
+
+const PulseAnimComp = styled.div<SkeletonProps>`
+  ${(props) => SkeletonCustomStyle(props)}
+  animation: ${pulseAnim} 1.6s linear infinite;
 `;
+const NoneAnimComp = styled.div<SkeletonProps>`
+  ${(props) => SkeletonCustomStyle(props)}
+`;
+const SlideAnimComp = styled.div<SkeletonProps>`
+  ${(props) => SkeletonCustomStyle(props)}
+  &::before {
+    animation: ${slideAnim} 1.5s linear infinite;
+  }
+  &::after {
+    animation-delay: 0.5s;
+    animation: ${slideAnim} 1s linear infinite;
+  }
+`;
+const BothAnimCamp = styled.div<SkeletonProps>`
+  ${(props) => SkeletonCustomStyle(props)}
+  animation: ${pulseAnim} 1.6s linear infinite;
+  &::before {
+    animation: ${slideAnim} 1.5s linear infinite;
+  }
+  &::after {
+    animation-delay: 0.5s;
+    animation: ${slideAnim} 1s linear infinite;
+  }
+`;
+
 const Skeleton: React.FC<SkeletonProps> = (props) => {
   const newModifiedProps = { ...props };
-  newModifiedProps["animType"] || (newModifiedProps["animType"] = "pulse");
   newModifiedProps["type"] || (newModifiedProps["type"] = "text");
   newModifiedProps["color"] || (newModifiedProps["color"] = "#ddd");
+  newModifiedProps["opacity"] || (newModifiedProps["opacity"] = "0.5");
+
+  if (newModifiedProps["anim"] !== false && !newModifiedProps["anim"]) {
+    newModifiedProps["anim"] = "pulse";
+  }
 
   newModifiedProps["size"] = checkPrefixAndModify(
     newModifiedProps["size"] || "20px",
@@ -138,7 +157,22 @@ const Skeleton: React.FC<SkeletonProps> = (props) => {
     "px"
   );
 
-  return <SkeletonComp {...newModifiedProps} />;
+  return (
+    <StyleSheetManager shouldForwardProp={(prop) => prop !== "animation"}>
+      {newModifiedProps["anim"] === false && (
+        <NoneAnimComp {...newModifiedProps} />
+      )}
+      {newModifiedProps["anim"] === "pulse" && (
+        <PulseAnimComp {...newModifiedProps} />
+      )}
+      {newModifiedProps["anim"] === "slide" && (
+        <SlideAnimComp {...newModifiedProps} />
+      )}
+      {newModifiedProps["anim"] === "both" && (
+        <BothAnimCamp {...newModifiedProps} />
+      )}
+    </StyleSheetManager>
+  );
 };
 
 export default Skeleton;

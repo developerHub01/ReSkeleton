@@ -40,7 +40,9 @@
     left: 200%;
   }
 }
-
+.abc {
+  background: #f8f8f8;
+}
 @keyframes baseSkeletonAnim {
   0%,
   100% {
